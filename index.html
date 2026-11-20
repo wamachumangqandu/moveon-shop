@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MOVEON Shop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: confident South African streetwear label, bold and clean
+   IDEA: a shop window: black hero wall, stock laid out on pale shelves
+   PICTURE: giant red/white wordmark with three product swatches
+   COLOUR and TYPE: MOVEON black #121212, white, MOVEON yellow #ffcc00; Archivo 900 for display
+   LAYOUT: sticky nav, full-bleed hero, shop grid, about, contact, black footer; manager slides in from right */
+:root{color-scheme:light dark;--bg:light-dark(#fff,#0e0e0e);--ink:light-dark(#121212,#f2f2f0);--mute:light-dark(#666,#a3a3a0);--tile:light-dark(#f1f1ef,#1c1c1b);--line:light-dark(#e3e3e0,#2b2b2a);--red:#ffcc00;--danger:#c62828;--hero:#121212;--btn:light-dark(#121212,#f2f2f0);--btnInk:light-dark(#fff,#121212)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Archivo,system-ui,sans-serif;overflow-x:clip}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:1240px;margin:0 auto;padding:0 max(5vw,16px)}
+header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:16px;min-height:68px;flex-wrap:wrap}
+.logo{font-weight:800;letter-spacing:.18em;font-size:18px;text-decoration:none;white-space:nowrap}
+.links{display:flex;gap:28px;margin:0 auto;flex-wrap:wrap}
+.links a{text-decoration:none;letter-spacing:.1em;font-size:14px}
+.links a:hover{text-decoration:underline;text-underline-offset:6px;text-decoration-color:var(--red);text-decoration-thickness:3px}
+.pill{background:var(--red);color:#121212;border:0;border-radius:999px;padding:11px 20px;font-weight:600;cursor:pointer;min-height:44px}
+.hero{background:var(--hero);color:#fff}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:40px;align-items:end;padding-block:clamp(80px,14vw,170px) clamp(40px,6vw,72px)}
+.hero h1{margin:0;font-weight:900;font-size:clamp(72px,16vw,210px);line-height:.92;letter-spacing:-.02em}
+.hero h1 span{display:block;color:var(--red)}
+.hero p{margin:0 0 24px;font-size:clamp(17px,1.6vw,20px);color:#ddd}
+.ghost{display:inline-block;background:var(--red);border-radius:5px;padding:14px 26px;letter-spacing:.12em;text-decoration:none;font-size:14px;font-weight:700;color:#121212}
+.ghost:hover{background:#e6b800}
+.swatches{display:flex;gap:14px;margin-top:28px}
+.swatches div{width:72px;height:90px;background:#f1f1ef;border-radius:3px;display:grid;place-items:center}
+.swatches svg{width:46px;height:46px}
+.swatches div{overflow:hidden}.swatches img{width:100%;height:100%;object-fit:cover;object-position:center 20%}
+section.band{padding-block:clamp(40px,6vw,80px)}
+h2.lab{font-size:15px;letter-spacing:.14em;margin:0 0 20px;font-weight:800}
+.bar{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:end}
+.cats{display:flex;gap:6px 26px;flex-wrap:wrap}
+.cats button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 0;letter-spacing:.1em;color:var(--mute);cursor:pointer;font-size:14px;min-height:44px}
+.cats button.on{color:var(--ink);border-color:var(--ink)}
+.search{border:0;border-bottom:1px solid var(--line);background:none;padding:10px 4px;width:min(300px,100%);font-size:16px}
+.search:focus{outline:none;border-color:var(--ink)}
+.count{color:var(--mute);letter-spacing:.1em;font-size:13px;margin:22px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:28px 24px}
+.card .pic{position:relative;aspect-ratio:3/4;background:var(--tile);display:grid;place-items:center;overflow:hidden}
+.card .pic img{width:100%;height:100%;object-fit:cover;object-position:center 25%}
+.card .pic svg{width:55%}
+.card .pic img[hidden]{display:none}
+.sl{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.85);color:#121212;font-size:24px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.sl.prev{left:10px}.sl.next{right:10px}
+.dots{position:absolute;bottom:12px;left:0;right:0;display:flex;justify-content:center;gap:6px}
+.dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.6)}.dots i.on{background:var(--red)}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap}.thumbs .th{position:relative}.thumbs .x{position:absolute;top:2px;right:2px;width:24px;height:24px;border-radius:50%;border:0;background:#121212;color:#fff;cursor:pointer;font-size:14px}
+.card.sold .pic>*:not(.badge){opacity:.45}
+.badge{position:absolute;top:12px;font-size:12px;letter-spacing:.1em;padding:5px 10px}
+.badge.new{left:12px;background:#fff;color:#121212}
+.badge.out{right:12px;background:#b8432a;color:#fff}
+.card .meta{color:var(--mute);font-size:12px;letter-spacing:.1em;margin:14px 0 4px;text-transform:uppercase}
+.card h3{margin:0;font-weight:500;font-size:18px;line-height:1.3}
+.card .price{margin:4px 0;white-space:nowrap}
+.card .sizes{color:var(--mute);font-size:14px}
+.card .desc{font-size:14px;color:var(--mute);margin:6px 0 0}
+.card .order{display:inline-block;margin-top:10px;font-size:13px;letter-spacing:.08em;text-decoration:underline}
+.empty{padding:50px 0;color:var(--mute)}
+.about{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.about h2{margin:0;font-weight:900;font-size:clamp(34px,5vw,52px);line-height:1.05;text-wrap:balance}
+.about p{color:var(--mute);font-size:18px;margin:0;white-space:pre-line}
+.contact{display:flex;gap:28px 64px;flex-wrap:wrap}
+.contact small{display:block;color:var(--mute);letter-spacing:.1em;font-size:13px}
+.contact b a{text-decoration-color:var(--red);text-decoration-thickness:2px}
+.contact b{font-weight:400;font-size:clamp(18px,2vw,22px)}
+footer{background:#121212;color:#fff;padding-block:48px}
+footer .links{margin:20px 0}
+footer .row{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:#bbb;font-size:15px}
+footer button{background:none;border:0;color:#bbb;text-decoration:underline;cursor:pointer;padding:0}
+/* manager */
+.shade{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40;display:none}
+.panel{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--bg);z-index:50;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column}
+.open .shade{display:block}.open .panel{transform:none}
+@media(prefers-reduced-motion:reduce){.panel{transition:none}html{scroll-behavior:auto}}
+.ph{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+.ph h2{margin:0;font-size:26px}
+.btn{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;min-height:44px}
+.btn.soft{background:var(--tile)}
+.btn.dark{background:var(--red);color:#121212;border-color:var(--red)}
+.btn.danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+.tabs{display:flex;gap:24px;padding:0 20px;border-bottom:1px solid var(--line)}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:14px 6px;font-weight:600;font-size:17px;color:var(--mute);cursor:pointer}
+.tabs button.on{color:var(--ink);border-color:var(--ink)}
+.pb{padding:20px;overflow-y:auto;flex:1}
+.note{background:var(--tile);border:1px solid var(--line);border-radius:8px;padding:12px 14px;color:var(--mute);font-size:14px;margin:14px 0}
+.row2{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.item{display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.item .th{width:56px;height:68px;flex:none;background:var(--tile);border-radius:4px;display:grid;place-items:center;overflow:hidden}
+.item .th img{width:100%;height:100%;object-fit:cover}.item .th svg{width:36px}
+.item .tx{flex:1}.item b{display:block}.item span{color:var(--mute);font-size:14px}
+.item .acts{display:flex;gap:8px}
+label.f{display:block;font-weight:600;margin:14px 0 6px;font-size:15px}
+.in{width:100%;background:var(--tile);border:1px solid var(--line);border-radius:8px;padding:11px 14px;font-size:16px}
+.in:focus,.btn:focus-visible,.pill:focus-visible,.cats button:focus-visible{outline:2px solid light-dark(#121212,#ffcc00);outline-offset:2px}
+textarea.in{min-height:96px;resize:vertical}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:flex;align-items:center;gap:8px;background:var(--tile);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer;min-height:44px}
+.chip input{width:18px;height:18px;accent-color:#121212}
+.photo{display:flex;gap:14px;align-items:center}
+.photo .th,.thumbs .th{width:80px;height:96px;background:var(--tile);border-radius:6px;display:grid;place-items:center;overflow:hidden;flex:none}
+.photo .th img{width:100%;height:100%;object-fit:cover}.photo .th svg{width:48px}
+.err{color:var(--danger);font-size:14px;margin-top:8px}
+.foot{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+.modal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.5);display:none;place-items:center;padding:16px}
+.modal.show{display:grid}
+.modal .box{background:var(--bg);border-radius:12px;padding:22px;width:min(400px,100%)}
+.modal h3{margin:0 0 8px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--btn);color:var(--btnInk);padding:12px 18px;border-radius:8px;z-index:70;display:none}
+@media(max-width:760px){.hero .wrap,.about{grid-template-columns:minmax(0,1fr)}.links{order:3;width:100%;gap:18px;margin:0 0 10px}.nav{justify-content:space-between}}
+@media(max-width:600px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 12px}.card h3{font-size:15px}.two{grid-template-columns:minmax(0,1fr)}.item{flex-wrap:wrap}.item .acts{width:100%;justify-content:flex-end}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="logo" href="#home">MOVEON</a>
+  <nav class="links"><a href="#home">HOME</a><a href="#about">ABOUT</a><a href="#shop">SHOP</a><a href="#contact">CONTACT</a></nav>
+  <button class="pill" id="mgrBtn">Manage shop</button>
+</div></header>
+
+<section class="hero" id="home"><div class="wrap">
+  <h1>MOVE<span>ON</span></h1>
+  <div>
+    <p id="tagline"></p>
+    <a class="ghost" href="#shop">SHOP ALL PRODUCTS</a>
+    <div class="swatches" id="swatches"></div>
+  </div>
+</div></section>
+
+<section class="band" id="shop"><div class="wrap">
+  <h2 class="lab">SHOP ALL</h2>
+  <div class="bar">
+    <div class="cats" id="cats"></div>
+    <input class="search" id="q" type="search" placeholder="Search" aria-label="Search products">
+  </div>
+  <div class="count" id="count"></div>
+  <div class="grid" id="grid"></div>
+</div></section>
+
+<section class="band" id="about"><div class="wrap about" style="padding-block:clamp(40px,6vw,80px)">
+  <h2>WELCOME TO MOVEON</h2>
+  <p id="aboutTx"></p>
+</div></section>
+
+<section class="band" id="contact" style="padding-top:0"><div class="wrap">
+  <h2 class="lab">CONTACT &amp; ORDERS</h2>
+  <div class="contact" id="contactRow"></div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="logo">MOVEON</div>
+  <nav class="links" style="margin-left:0"><a href="#home">HOME</a><a href="#about">ABOUT</a><a href="#shop">SHOP</a><a href="#contact">CONTACT</a></nav>
+  <div class="row"><span>© 2026 MOVEON – Empowering individuality. Always moving forward. Prices in Rand.</span><button id="mgrLink">Manager area</button></div>
+</div></footer>
+
+<div id="mgr">
+  <div class="shade" id="shade"></div>
+  <aside class="panel" aria-label="Manage shop">
+    <div class="ph"><h2>Manage shop</h2><button class="btn" id="closeBtn">Close</button></div>
+    <div class="tabs"><button class="on" data-t="items">Clothing items</button><button data-t="details">Shop details</button></div>
+    <div class="pb" id="pb"></div>
+  </aside>
+</div>
+
+<div class="modal" id="modal"><div class="box" id="mbox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+{
+const KEY='moveon-shop-v4';
+const CATS=['T-Shirts','Hoodies','Accessories'];
+const SIZES=['XS','S','M','L','XL','XXL','3XL','One size','28','30','32','34','36'];
+const DEFAULT={
+  details:{tagline:'Live Free, Express Boldly.',about:"Born in the heart of King William's Town in the Eastern Cape, MOVEON is a clothing brand created by bold young men and women with a vision to empower others.\n\nWe celebrate individuality, free spirit, and the power of self-expression through unique streetwear and culture-driven fashion. Whether you're dancing in the streets, chasing your dreams, or creating your path, MOVEON moves with you.\n\nIt's not just fashion. It's a way of life.",whatsapp:'082 123 4567',phone:'',tiktok:'@moveon.clothing',orders:'WhatsApp + delivery',location:"King William's Town, Eastern Cape",pin:'1234'},
+  items:[
+    {id:1,name:'Beige Tee',price:249,cat:'T-Shirts',sizes:['S','M','L','XL'],desc:'Oversized beige tee with the MOVEON logo on the chest and a big print on the back.',shape:'tee',color:'#e8d6bf',imgs:['img/beige-front.jpg','img/beige-back.jpg'],isNew:true,inStock:true},
+    {id:2,name:'Black Tee',price:249,cat:'T-Shirts',sizes:['S','M','L','XL'],desc:'Black tee with the white MOVEON logo on the chest.',shape:'tee',color:'#141414',imgs:['img/black-front.jpg','img/black-white-pair.jpg'],isNew:true,inStock:true},
+    {id:3,name:'White Tee',price:249,cat:'T-Shirts',sizes:['S','M','L','XL'],desc:'White tee with the MOVEON logo on the chest and a big print on the back.',shape:'tee',color:'#f4f4f2',imgs:['img/white-front.jpg','img/white-side.jpg'],isNew:true,inStock:true}
+  ]};
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!S.items)S=JSON.parse(JSON.stringify(DEFAULT));
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Could not save on this device (storage full or blocked).')}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rand=n=>'R '+Number(n).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2});
+const waNum=n=>{let d=String(n).replace(/\D/g,'');if(d.startsWith('0'))d='27'+d.slice(1);return d};
+function art(it){
+  const c=esc(it.color||'#141414');
+  if(it.shape==='shorts')return `<svg viewBox="0 0 100 100"><rect x="22" y="14" width="56" height="10" fill="#555"/><path d="M22 22h56l4 64H56L50 40l-6 46H18z" fill="${c}"/></svg>`;
+  if(it.shape==='cap')return `<svg viewBox="0 0 100 100"><path d="M24 62a26 24 0 0 1 52 0z" fill="${c}"/><path d="M14 66q30-10 66-4l-2 4q-34-4-64 6z" fill="#bbb"/><circle cx="50" cy="37" r="3" fill="${c}"/></svg>`;
+  if(it.shape==='hoodie')return `<svg viewBox="0 0 100 100"><path d="M36 14q14-10 28 0l18 8 10 28-14 5-4-10v45H26V45l-4 10-14-5 10-28z" fill="${c}"/><path d="M40 16q10 14 20 0" fill="none" stroke="#000" stroke-opacity=".3" stroke-width="3"/></svg>`;
+  return `<svg viewBox="0 0 100 100"><path d="M34 14q16 10 32 0l22 10-6 20-10-3v50H28V41l-10 3-6-20z" fill="${c}" stroke="#00000033" stroke-width="1.2"/></svg>`;
+}
+const imgsOf=it=>it.imgs&&it.imgs.length?it.imgs:(it.img?[it.img]:[]);
+const pic=it=>{const im=imgsOf(it);return im.length?`<img src="${im[0]}" alt="${esc(it.name)}" loading="lazy">`:art(it)};
+const slides=it=>{const im=imgsOf(it);if(im.length<2)return pic(it);return im.map((u,i)=>`<img src="${u}" alt="${esc(it.name)} photo ${i+1}" loading="lazy"${i?' hidden':''}>`).join('')+`<button class="sl prev" data-s="-1" aria-label="Previous photo">‹</button><button class="sl next" data-s="1" aria-label="Next photo">›</button><span class="dots">${im.map((_,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</span>`};
+let cat='All',q='';
+function renderShop(){
+  const d=S.details;
+  $('tagline').textContent=d.tagline;
+  $('aboutTx').textContent=d.about;
+  const tk=d.tiktok?(d.tiktok.startsWith('@')?d.tiktok:'@'+d.tiktok):'';
+  $('contactRow').innerHTML=[['WHATSAPP',d.whatsapp?`<a href="https://wa.me/${waNum(d.whatsapp)}" target="_blank" rel="noopener">${esc(d.whatsapp)}</a>`:'Coming soon'],...(d.phone?[['PHONE',esc(d.phone)]]:[]),['INSTAGRAM',tk?`<a href="https://www.instagram.com/${esc(tk.slice(1))}" target="_blank" rel="noopener">${esc(tk)}</a>`:'Coming soon'],['ORDERS',esc(d.orders)],...(d.location?[['FIND US',esc(d.location)]]:[])].map(([k,v])=>`<div><small>${k}</small><b>${v}</b></div>`).join('');
+  $('swatches').innerHTML=S.items.slice(0,3).map(it=>`<div>${pic(it)}</div>`).join('');
+  $('cats').innerHTML=['All','New in',...CATS].map(c=>`<button class="${c===cat?'on':''}" data-c="${c}">${c.toUpperCase()}</button>`).join('');
+  const list=S.items.filter(it=>(cat==='All'||(cat==='New in'?it.isNew:it.cat===cat))&&(!q||(it.name+' '+it.cat+' '+(it.desc||'')).toLowerCase().includes(q)));
+  $('count').textContent=list.length+(list.length===1?' ITEM':' ITEMS');
+  $('grid').innerHTML=list.length?list.map(it=>`<article class="card${it.inStock?'':' sold'}">
+    <div class="pic">${slides(it)}${it.isNew&&it.inStock?'<span class="badge new">NEW IN</span>':''}${it.inStock?'':'<span class="badge out">SOLD OUT</span>'}</div>
+    <div class="meta">${esc(it.cat)}${it.sample?' · sample':''}</div>
+    <h3>${esc(it.name)}</h3>
+    <div class="price">${rand(it.price)}</div>
+    <div class="sizes">Sizes: ${it.sizes.map(esc).join(' · ')||'—'}</div>
+    ${it.desc?`<p class="desc">${esc(it.desc)}</p>`:''}
+    ${it.inStock&&d.whatsapp?`<a class="order" target="_blank" rel="noopener" href="https://wa.me/${waNum(d.whatsapp)}?text=${encodeURIComponent(`Hi MOVEON, I'd like to order: ${it.name} (${rand(it.price)}). Size: `)}">ORDER ON WHATSAPP</a>`:''}
+  </article>`).join(''):'<div class="empty">No items match. Try another category or search.</div>';
+}
+$('cats').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;cat=b.dataset.c;renderShop()});
+$('grid').addEventListener('click',e=>{const b=e.target.closest('.sl');if(!b)return;const p=b.parentElement,ims=[...p.querySelectorAll('img')],ds=[...p.querySelectorAll('.dots i')];let i=ims.findIndex(m=>!m.hidden);ims[i].hidden=true;ds[i].classList.remove('on');i=(i+ +b.dataset.s+ims.length)%ims.length;ims[i].hidden=false;ds[i].classList.add('on')});
+$('q').addEventListener('input',e=>{q=e.target.value.trim().toLowerCase();renderShop()});
+
+/* toast + modal */
+let tt;function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(tt);tt=setTimeout(()=>t.style.display='none',2600)}
+function modal(html){$('mbox').innerHTML=html;$('modal').classList.add('show')}
+function closeModal(){$('modal').classList.remove('show')}
+$('modal').addEventListener('click',e=>{if(e.target.id==='modal'||e.target.dataset.x==='cancel')closeModal()});
+
+/* manager */
+let unlocked=false,tab='items',editing=null;
+function openMgr(){
+  if(!unlocked){
+    modal(`<h3>Manager sign-in</h3><p style="color:var(--mute);margin:0 0 12px">Enter the manager PIN to manage the shop.</p>
+      <form id="pinF"><input class="in" id="pin" type="password" inputmode="numeric" autocomplete="off" aria-label="PIN"><div class="err" id="pinErr"></div>
+      <div class="foot"><button type="button" class="btn" data-x="cancel">Cancel</button><button class="btn dark">Open</button></div></form>
+      <p style="color:var(--mute);font-size:13px;margin:12px 0 0">Demo PIN: 1234. Change it under Shop details.</p>`);
+    $('pin').focus();
+    $('pinF').onsubmit=e=>{e.preventDefault();if($('pin').value===S.details.pin){unlocked=true;closeModal();openMgr()}else $('pinErr').textContent='That PIN is not right.'};
+    return;
+  }
+  document.body.classList.add('open');document.getElementById('mgr').className='open';renderMgr();
+}
+function closeMgr(){document.getElementById('mgr').className=''}
+$('mgrBtn').onclick=openMgr;$('mgrLink').onclick=openMgr;$('closeBtn').onclick=closeMgr;$('shade').onclick=closeMgr;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('modal').classList.contains('show'))closeModal();else closeMgr()}});
+document.querySelector('.tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;tab=b.dataset.t;editing=null;renderMgr()});
+
+function renderMgr(){
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+  const pb=$('pb');
+  if(tab==='details')return detailsForm(pb);
+  if(editing)return itemForm(pb);
+  const hasSample=S.items.some(i=>i.sample);
+  pb.innerHTML=`<div class="row2"><span style="color:var(--mute)">${S.items.length} item${S.items.length===1?'':'s'} in the shop</span><button class="btn dark" id="addBtn">+ Add new item</button></div>
+   ${hasSample?'<div class="note">Items marked “sample” are examples to show the layout. Edit them into real stock or delete them.</div>':''}
+   ${S.items.map(it=>`<div class="item"><div class="th">${pic(it)}</div><div class="tx"><b>${esc(it.name)}</b><span>${esc(it.cat)} · ${rand(it.price)}${it.inStock?'':' · sold out'}${it.sample?' · sample':''}</span></div>
+   <div class="acts"><button class="btn soft" data-e="${it.id}">Edit</button><button class="btn soft" data-d="${it.id}">Delete</button></div></div>`).join('')||'<p class="empty">No items yet. Tap “Add new item”.</p>'}
+   <div class="note" style="margin-top:24px">Backup: copy your shop data to keep it safe or move it to another device.<div class="foot" style="justify-content:flex-start"><button class="btn" id="copyData">Copy shop data</button><button class="btn" id="pasteData">Restore from copy</button><button class="btn" id="resetData">Reset to demo</button></div></div>`;
+  $('addBtn').onclick=()=>{editing={id:0,name:'',price:'',cat:'T-Shirts',sizes:[],desc:'',shape:'tee',color:'#141414',isNew:true,inStock:true};renderMgr()};
+  pb.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{editing=JSON.parse(JSON.stringify(S.items.find(i=>i.id==b.dataset.e)));renderMgr()});
+  pb.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{
+    const it=S.items.find(i=>i.id==b.dataset.d);
+    modal(`<h3>Delete this item?</h3><p style="color:var(--mute)">“${esc(it.name)}” will be removed from the shop. This can't be undone.</p><div class="foot"><button class="btn" data-x="cancel">Keep it</button><button class="btn danger" id="yesDel">Delete</button></div>`);
+    $('yesDel').onclick=()=>{S.items=S.items.filter(i=>i!==it);save();closeModal();renderMgr();renderShop();toast('Item deleted')};
+  });
+  $('copyData').onclick=async()=>{try{await navigator.clipboard.writeText(JSON.stringify(S));toast('Shop data copied')}catch(e){modal(`<h3>Copy this text</h3><textarea class="in" style="min-height:200px" readonly>${esc(JSON.stringify(S))}</textarea><div class="foot"><button class="btn" data-x="cancel">Done</button></div>`)}};
+  $('pasteData').onclick=()=>{modal(`<h3>Restore shop data</h3><p style="color:var(--mute)">Paste data you copied earlier. It replaces everything currently in the shop.</p><textarea class="in" id="rest" style="min-height:160px"></textarea><div class="err" id="restErr"></div><div class="foot"><button class="btn" data-x="cancel">Cancel</button><button class="btn dark" id="doRest">Restore</button></div>`);
+    $('doRest').onclick=()=>{try{const d=JSON.parse($('rest').value);if(!d.items||!d.details)throw 0;S=d;save();closeModal();renderMgr();renderShop();toast('Shop restored')}catch(e){$('restErr').textContent='That text is not valid shop data.'}}};
+  $('resetData').onclick=()=>{modal(`<h3>Reset to demo?</h3><p style="color:var(--mute)">All your items and details go back to the sample shop.</p><div class="foot"><button class="btn" data-x="cancel">Cancel</button><button class="btn danger" id="doReset">Reset</button></div>`);
+    $('doReset').onclick=()=>{S=JSON.parse(JSON.stringify(DEFAULT));save();closeModal();renderMgr();renderShop();toast('Demo restored')}};
+}
+function itemForm(pb){
+  const it=editing,isNewItem=!it.id;
+  pb.innerHTML=`<div class="row2"><h3 style="margin:0;font-size:22px">${isNewItem?'Add a new item':'Edit item'}</h3><button class="btn" id="back">Back to list</button></div>
+  <form id="itF">
+   <label class="f" for="fn">Item name</label><input class="in" id="fn" value="${esc(it.name)}" placeholder="Embroidered Polo" required>
+   <div class="two"><div><label class="f" for="fp">Price (R)</label><input class="in" id="fp" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(it.price)}" placeholder="449.00" required></div>
+   <div><label class="f" for="fc">Category</label><select class="in" id="fc">${CATS.map(c=>`<option${c===it.cat?' selected':''}>${c}</option>`).join('')}</select></div></div>
+   <label class="f">Sizes available</label><div class="chips">${SIZES.map(s=>`<label class="chip"><input type="checkbox" value="${s}"${it.sizes.includes(s)?' checked':''}>${s}</label>`).join('')}</div>
+   <label class="f" for="fd">Description</label><textarea class="in" id="fd" placeholder="Fabric, fit, what it's good for">${esc(it.desc)}</textarea>
+   <label class="f" for="ff">Photos</label>
+   <div class="photo"><div class="thumbs" id="prev"></div><div><input type="file" id="ff" accept="image/*" multiple><div style="color:var(--mute);font-size:13px;margin-top:6px">Add front, back or side photos. The first photo shows in the shop. Photos are resized automatically.</div></div></div>
+   <div class="chips" style="margin-top:16px"><label class="chip"><input type="checkbox" id="fnew"${it.isNew?' checked':''}>Show “New in” badge</label><label class="chip"><input type="checkbox" id="fstock"${it.inStock?' checked':''}>In stock</label></div>
+   <div class="err" id="itErr"></div>
+   <div class="foot"><button class="btn dark">${isNewItem?'Add item to shop':'Save changes'}</button></div>
+  </form>`;
+  $('back').onclick=()=>{editing=null;renderMgr()};
+  if(!it.imgs)it.imgs=it.img?[it.img]:[];delete it.img;
+  const drawPrev=()=>{$('prev').innerHTML=it.imgs.length?it.imgs.map((u,i)=>`<div class="th"><img src="${u}" alt=""><button type="button" class="x" data-r="${i}" aria-label="Remove photo">×</button></div>`).join(''):`<div class="th">${art(it)}</div>`};drawPrev();
+  $('prev').onclick=e=>{const b=e.target.closest('[data-r]');if(!b)return;it.imgs.splice(+b.dataset.r,1);drawPrev()};
+  $('ff').onchange=e=>{[...e.target.files].forEach(f=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const M=900,k=Math.min(1,M/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);it.imgs.push(c.toDataURL('image/jpeg',.8));drawPrev()};im.onerror=()=>$('itErr').textContent='A file could not be read as a photo.';im.src=r.result};r.readAsDataURL(f)});e.target.value=''};
+  $('itF').onsubmit=e=>{e.preventDefault();
+    const name=$('fn').value.trim(),price=parseFloat($('fp').value);
+    if(!name||!(price>=0)){$('itErr').textContent='Please add a name and a price.';return}
+    Object.assign(it,{name,price,cat:$('fc').value,desc:$('fd').value.trim(),sizes:[...pb.querySelectorAll('.chips input[value]:checked')].map(x=>x.value),isNew:$('fnew').checked,inStock:$('fstock').checked,sample:false});
+    if(isNewItem){it.id=Date.now();S.items.unshift(it)}else S.items=S.items.map(x=>x.id===it.id?it:x);
+    save();editing=null;renderMgr();renderShop();toast(isNewItem?'Item added to shop':'Changes saved');
+  };
+}
+function detailsForm(pb){
+  const d=S.details;
+  pb.innerHTML=`<form id="dF">
+   <label class="f" for="dt">Tagline</label><input class="in" id="dt" value="${esc(d.tagline)}">
+   <label class="f" for="da">About text</label><textarea class="in" id="da" style="min-height:130px">${esc(d.about)}</textarea>
+   <div class="two"><div><label class="f" for="dw">WhatsApp number</label><input class="in" id="dw" type="tel" value="${esc(d.whatsapp)}"></div><div><label class="f" for="dp">Phone</label><input class="in" id="dp" type="tel" value="${esc(d.phone)}"></div></div>
+   <label class="f" for="dk">Instagram</label><input class="in" id="dk" value="${esc(d.tiktok)}">
+   <label class="f" for="do">Orders and delivery</label><input class="in" id="do" value="${esc(d.orders)}">
+   <label class="f" for="dl">Location</label><input class="in" id="dl" value="${esc(d.location||'')}">
+   <label class="f" for="dpin">Manager PIN</label><input class="in" id="dpin" value="${esc(d.pin)}" inputmode="numeric" minlength="4" required>
+   <div class="foot"><button class="btn dark">Save details</button></div></form>`;
+  $('dF').onsubmit=e=>{e.preventDefault();Object.assign(d,{tagline:$('dt').value.trim(),about:$('da').value.trim(),whatsapp:$('dw').value.trim(),phone:$('dp').value.trim(),tiktok:$('dk').value.trim(),orders:$('do').value.trim(),location:$('dl').value.trim(),pin:$('dpin').value.trim()});save();renderShop();toast('Shop details saved')};
+}
+renderShop();
+}
+</script>
+</body>
+</html>
