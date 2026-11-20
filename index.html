@@ -244,8 +244,7 @@ function openMgr(){
   if(!unlocked){
     modal(`<h3>Manager sign-in</h3><p style="color:var(--mute);margin:0 0 12px">Enter the manager PIN to manage the shop.</p>
       <form id="pinF"><input class="in" id="pin" type="password" inputmode="numeric" autocomplete="off" aria-label="PIN"><div class="err" id="pinErr"></div>
-      <div class="foot"><button type="button" class="btn" data-x="cancel">Cancel</button><button class="btn dark">Open</button></div></form>
-      <p style="color:var(--mute);font-size:13px;margin:12px 0 0">Demo PIN: 1234. Change it under Shop details.</p>`);
+      <div class="foot"><button type="button" class="btn" data-x="cancel">Cancel</button><button class="btn dark">Open</button></div></form>`);
     $('pin').focus();
     $('pinF').onsubmit=e=>{e.preventDefault();if($('pin').value===S.details.pin){unlocked=true;closeModal();openMgr()}else $('pinErr').textContent='That PIN is not right.'};
     return;

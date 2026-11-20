@@ -17,4 +17,4 @@ Open `index.html` in a browser, or turn on GitHub Pages (Settings → Pages → 
 
 ## Notes
 - Manager changes are saved in the browser of the device they're made on.
-- The default manager PIN is `1234`. Change it under Manage shop → Shop details.
+- Change the manager PIN under Manage shop → Shop details.
