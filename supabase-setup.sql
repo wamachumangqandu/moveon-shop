@@ -86,7 +86,7 @@ insert into public.settings (id, tagline, about, whatsapp, phone, instagram, ord
   1,
   'Live Free, Express Boldly.',
   E'Born in the heart of King William''s Town in the Eastern Cape, MOVEON is a clothing brand created by bold young men and women with a vision to empower others.\n\nWe celebrate individuality, free spirit, and the power of self-expression through unique streetwear and culture-driven fashion. Whether you''re dancing in the streets, chasing your dreams, or creating your path, MOVEON moves with you.\n\nIt''s not just fashion. It''s a way of life.',
-  '082 123 4567', '', '@moveon.clothing', 'WhatsApp + delivery', 'King William''s Town, Eastern Cape'
+  '068 122 6651', '', '@moveon.clothing', 'WhatsApp + delivery', 'King William''s Town, Eastern Cape'
 ) on conflict (id) do nothing;
 
 insert into public.products (name, price, category, sizes, description, color, images, is_new, in_stock, sort_order)
