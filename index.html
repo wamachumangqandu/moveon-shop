@@ -186,15 +186,15 @@ textarea.in{min-height:96px;resize:vertical}
 const SUPABASE_URL='';
 const SUPABASE_ANON_KEY='';
 
-const KEY='moveon-shop-v5';
+const KEY='moveon-shop-v6';
 const CATS=['T-Shirts','Hoodies','Accessories'];
 const SIZES=['XS','S','M','L','XL','XXL','3XL','One size','28','30','32','34','36'];
 const DEFAULT={
   details:{tagline:'Live Free, Express Boldly.',about:"Born in the heart of King William's Town in the Eastern Cape, MOVEON is a clothing brand created by bold young men and women with a vision to empower others.\n\nWe celebrate individuality, free spirit, and the power of self-expression through unique streetwear and culture-driven fashion. Whether you're dancing in the streets, chasing your dreams, or creating your path, MOVEON moves with you.\n\nIt's not just fashion. It's a way of life.",whatsapp:'068 122 6651',phone:'',tiktok:'@moveon.clothing',orders:'WhatsApp + delivery',location:"King William's Town, Eastern Cape",pin:'1234'},
   items:[
-    {id:1,name:'Beige Tee',price:249,cat:'T-Shirts',sizes:['S','M','L','XL'],desc:'Oversized beige tee with the MOVEON logo on the chest and a big print on the back.',shape:'tee',color:'#e8d6bf',imgs:['img/beige-front.jpg','img/beige-back.jpg'],isNew:true,inStock:true},
-    {id:2,name:'Black Tee',price:249,cat:'T-Shirts',sizes:['S','M','L','XL'],desc:'Black tee with the white MOVEON logo on the chest.',shape:'tee',color:'#141414',imgs:['img/black-front.jpg','img/black-white-pair.jpg'],isNew:true,inStock:true},
-    {id:3,name:'White Tee',price:249,cat:'T-Shirts',sizes:['S','M','L','XL'],desc:'White tee with the MOVEON logo on the chest and a big print on the back.',shape:'tee',color:'#f4f4f2',imgs:['img/white-front.jpg','img/white-side.jpg'],isNew:true,inStock:true}
+    {id:1,name:'Beige Tee',price:400,cat:'T-Shirts',sizes:['S','M','L','XL'],desc:'Oversized beige tee with the MOVEON logo on the chest and a big print on the back.',shape:'tee',color:'#e8d6bf',imgs:['img/beige-front.jpg','img/beige-back.jpg'],isNew:true,inStock:true},
+    {id:2,name:'Black Tee',price:400,cat:'T-Shirts',sizes:['S','M','L','XL'],desc:'Black tee with the white MOVEON logo on the chest.',shape:'tee',color:'#141414',imgs:['img/black-front.jpg','img/black-white-pair.jpg'],isNew:true,inStock:true},
+    {id:3,name:'White Tee',price:400,cat:'T-Shirts',sizes:['S','M','L','XL'],desc:'White tee with the MOVEON logo on the chest and a big print on the back.',shape:'tee',color:'#f4f4f2',imgs:['img/white-front.jpg','img/white-side.jpg'],isNew:true,inStock:true}
   ]};
 const DB=(SUPABASE_URL&&SUPABASE_ANON_KEY&&window.supabase)?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
 const BUCKET='product-photos';

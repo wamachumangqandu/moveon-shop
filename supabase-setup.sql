@@ -91,9 +91,9 @@ insert into public.settings (id, tagline, about, whatsapp, phone, instagram, ord
 
 insert into public.products (name, price, category, sizes, description, color, images, is_new, in_stock, sort_order)
 select * from (values
-  ('Beige Tee', 249, 'T-Shirts', array['S','M','L','XL'], 'Oversized beige tee with the MOVEON logo on the chest and a big print on the back.', '#e8d6bf', array['img/beige-front.jpg','img/beige-back.jpg'], true, true, 1),
-  ('Black Tee', 249, 'T-Shirts', array['S','M','L','XL'], 'Black tee with the white MOVEON logo on the chest.', '#141414', array['img/black-front.jpg','img/black-white-pair.jpg'], true, true, 2),
-  ('White Tee', 249, 'T-Shirts', array['S','M','L','XL'], 'White tee with the MOVEON logo on the chest and a big print on the back.', '#f4f4f2', array['img/white-front.jpg','img/white-side.jpg'], true, true, 3)
+  ('Beige Tee', 400, 'T-Shirts', array['S','M','L','XL'], 'Oversized beige tee with the MOVEON logo on the chest and a big print on the back.', '#e8d6bf', array['img/beige-front.jpg','img/beige-back.jpg'], true, true, 1),
+  ('Black Tee', 400, 'T-Shirts', array['S','M','L','XL'], 'Black tee with the white MOVEON logo on the chest.', '#141414', array['img/black-front.jpg','img/black-white-pair.jpg'], true, true, 2),
+  ('White Tee', 400, 'T-Shirts', array['S','M','L','XL'], 'White tee with the MOVEON logo on the chest and a big print on the back.', '#f4f4f2', array['img/white-front.jpg','img/white-side.jpg'], true, true, 3)
 ) as v(name, price, category, sizes, description, color, images, is_new, in_stock, sort_order)
 where not exists (select 1 from public.products);
 
