@@ -15,6 +15,13 @@ Online shop for **MOVEON**, a streetwear brand from King William's Town, Eastern
 ## Run it
 Open `index.html` in a browser, or turn on GitHub Pages (Settings → Pages → Deploy from branch → `main`).
 
-## Notes
-- Manager changes are saved in the browser of the device they're made on.
-- Change the manager PIN under Manage shop → Shop details.
+## Database (Supabase, free)
+With a database connected, every change in Manage shop shows for all customers straight away, and the manager signs in with email + password.
+
+1. Create a free account at supabase.com and a new project (region: Cape Town if offered).
+2. Open **SQL Editor → New query**, paste everything from `supabase-setup.sql`, check the manager email on the last line, and click **Run**.
+3. Open **Authentication → Users → Add user → Create new user**: enter the manager email (same as in step 2) and a password, tick **Auto Confirm User**.
+4. Open **Authentication → Sign In / Providers** and turn **off** "Allow new users to sign up".
+5. Open **Project Settings → API**, copy the **Project URL** and the **anon public** key, and paste them into `SUPABASE_URL` and `SUPABASE_ANON_KEY` near the top of the script in `index.html`.
+
+Without these two values the shop still works, but changes are saved only on the device they're made on (with a PIN, default `1234`).

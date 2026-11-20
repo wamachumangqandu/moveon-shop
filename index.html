@@ -177,8 +177,15 @@ textarea.in{min-height:96px;resize:vertical}
 <div class="modal" id="modal"><div class="box" id="mbox"></div></div>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 {
+/* ===== DATABASE SETTINGS =====
+   Paste your Supabase Project URL and anon public key here (Supabase → Project Settings → API).
+   Leave them empty to run the shop without a database (changes stay on one device). */
+const SUPABASE_URL='';
+const SUPABASE_ANON_KEY='';
+
 const KEY='moveon-shop-v4';
 const CATS=['T-Shirts','Hoodies','Accessories'];
 const SIZES=['XS','S','M','L','XL','XXL','3XL','One size','28','30','32','34','36'];
@@ -189,14 +196,41 @@ const DEFAULT={
     {id:2,name:'Black Tee',price:249,cat:'T-Shirts',sizes:['S','M','L','XL'],desc:'Black tee with the white MOVEON logo on the chest.',shape:'tee',color:'#141414',imgs:['img/black-front.jpg','img/black-white-pair.jpg'],isNew:true,inStock:true},
     {id:3,name:'White Tee',price:249,cat:'T-Shirts',sizes:['S','M','L','XL'],desc:'White tee with the MOVEON logo on the chest and a big print on the back.',shape:'tee',color:'#f4f4f2',imgs:['img/white-front.jpg','img/white-side.jpg'],isNew:true,inStock:true}
   ]};
+const DB=(SUPABASE_URL&&SUPABASE_ANON_KEY&&window.supabase)?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
+const BUCKET='product-photos';
 let S;
-try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
-if(!S||!S.items)S=JSON.parse(JSON.stringify(DEFAULT));
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Could not save on this device (storage full or blocked).')}};
+if(DB){S={details:{...DEFAULT.details},items:[]};}
+else{try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!S||!S.items)S=JSON.parse(JSON.stringify(DEFAULT));}
+const save=()=>{if(DB)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Could not save on this device (storage full or blocked).')}};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const rand=n=>'R '+Number(n).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2});
 const waNum=n=>{let d=String(n).replace(/\D/g,'');if(d.startsWith('0'))d='27'+d.slice(1);return d};
+
+/* --- database mapping --- */
+const fromRow=r=>({id:r.id,name:r.name,price:Number(r.price),cat:r.category,sizes:r.sizes||[],desc:r.description||'',color:r.color,shape:r.shape||'tee',imgs:r.images||[],isNew:r.is_new,inStock:r.in_stock,sort:r.sort_order});
+const toRow=it=>({name:it.name,price:it.price,category:it.cat,sizes:it.sizes,description:it.desc,color:it.color||'#141414',shape:it.shape||'tee',images:it.imgs,is_new:it.isNew,in_stock:it.inStock,sort_order:it.sort||0});
+async function loadDB(){
+  const [st,pr]=await Promise.all([DB.from('settings').select('*').eq('id',1).maybeSingle(),DB.from('products').select('*').order('sort_order').order('id')]);
+  if(st.error||pr.error)throw st.error||pr.error;
+  if(st.data){const d=st.data;S.details={tagline:d.tagline,about:d.about,whatsapp:d.whatsapp,phone:d.phone,tiktok:d.instagram,orders:d.orders,location:d.location}}
+  S.items=pr.data.map(fromRow);
+}
+async function uploadPhotos(imgs){
+  const out=[];
+  for(const u of imgs){
+    if(!u.startsWith('data:')){out.push(u);continue}
+    const blob=await (await fetch(u)).blob();
+    const path=`p/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+    const {error}=await DB.storage.from(BUCKET).upload(path,blob,{contentType:'image/jpeg'});
+    if(error)throw error;
+    out.push(DB.storage.from(BUCKET).getPublicUrl(path).data.publicUrl);
+  }
+  return out;
+}
+const storagePath=u=>{const m=String(u).split(`/object/public/${BUCKET}/`);return m.length>1?decodeURIComponent(m[1]):null};
+async function removePhotos(urls){const p=urls.map(storagePath).filter(Boolean);if(p.length)await DB.storage.from(BUCKET).remove(p)}
+
 function art(it){
   const c=esc(it.color||'#141414');
   if(it.shape==='shorts')return `<svg viewBox="0 0 100 100"><rect x="22" y="14" width="56" height="10" fill="#555"/><path d="M22 22h56l4 64H56L50 40l-6 46H18z" fill="${c}"/></svg>`;
@@ -239,41 +273,65 @@ function closeModal(){$('modal').classList.remove('show')}
 $('modal').addEventListener('click',e=>{if(e.target.id==='modal'||e.target.dataset.x==='cancel')closeModal()});
 
 /* manager */
-let unlocked=false,tab='items',editing=null;
-function openMgr(){
+let unlocked=false,tab='items',editing=null,busy=false;
+async function checkAdmin(){const {data,error}=await DB.rpc('is_admin');return !error&&data===true}
+async function openMgr(){
+  if(!unlocked&&DB){
+    const {data}=await DB.auth.getSession();
+    if(data.session&&await checkAdmin()){unlocked=true}
+  }
   if(!unlocked){
-    modal(`<h3>Manager sign-in</h3><p style="color:var(--mute);margin:0 0 12px">Enter the manager PIN to manage the shop.</p>
-      <form id="pinF"><input class="in" id="pin" type="password" inputmode="numeric" autocomplete="off" aria-label="PIN"><div class="err" id="pinErr"></div>
-      <div class="foot"><button type="button" class="btn" data-x="cancel">Cancel</button><button class="btn dark">Open</button></div></form>`);
-    $('pin').focus();
-    $('pinF').onsubmit=e=>{e.preventDefault();if($('pin').value===S.details.pin){unlocked=true;closeModal();openMgr()}else $('pinErr').textContent='That PIN is not right.'};
+    if(DB){
+      modal(`<h3>Manager sign-in</h3><p style="color:var(--mute);margin:0 0 12px">Sign in with the manager email and password.</p>
+        <form id="pinF"><label class="f" for="em" style="margin-top:0">Email</label><input class="in" id="em" type="email" autocomplete="username" required>
+        <label class="f" for="pw">Password</label><input class="in" id="pw" type="password" autocomplete="current-password" required><div class="err" id="pinErr"></div>
+        <div class="foot"><button type="button" class="btn" data-x="cancel">Cancel</button><button class="btn dark" id="siBtn">Sign in</button></div></form>`);
+      $('em').focus();
+      $('pinF').onsubmit=async e=>{e.preventDefault();$('siBtn').disabled=true;$('pinErr').textContent='';
+        const {error}=await DB.auth.signInWithPassword({email:$('em').value.trim(),password:$('pw').value});
+        if(error){$('pinErr').textContent='Email or password is not right.';$('siBtn').disabled=false;return}
+        if(!await checkAdmin()){await DB.auth.signOut();$('pinErr').textContent='This account is not a shop manager.';$('siBtn').disabled=false;return}
+        unlocked=true;closeModal();openMgr()};
+    }else{
+      modal(`<h3>Manager sign-in</h3><p style="color:var(--mute);margin:0 0 12px">Enter the manager PIN to manage the shop.</p>
+        <form id="pinF"><input class="in" id="pin" type="password" inputmode="numeric" autocomplete="off" aria-label="PIN"><div class="err" id="pinErr"></div>
+        <div class="foot"><button type="button" class="btn" data-x="cancel">Cancel</button><button class="btn dark">Open</button></div></form>`);
+      $('pin').focus();
+      $('pinF').onsubmit=e=>{e.preventDefault();if($('pin').value===S.details.pin){unlocked=true;closeModal();openMgr()}else $('pinErr').textContent='That PIN is not right.'};
+    }
     return;
   }
-  document.body.classList.add('open');document.getElementById('mgr').className='open';renderMgr();
+  document.getElementById('mgr').className='open';renderMgr();
 }
 function closeMgr(){document.getElementById('mgr').className=''}
 $('mgrBtn').onclick=openMgr;$('mgrLink').onclick=openMgr;$('closeBtn').onclick=closeMgr;$('shade').onclick=closeMgr;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('modal').classList.contains('show'))closeModal();else closeMgr()}});
 document.querySelector('.tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;tab=b.dataset.t;editing=null;renderMgr()});
+async function refresh(){if(DB){try{await loadDB()}catch(e){toast('Saved, but could not reload. Refresh the page.')}}renderMgr();renderShop()}
+const fail=(el,e)=>{busy=false;const m='Could not save: '+(e&&e.message||'check your internet connection')+'.';if(el)el.textContent=m;else toast(m)};
 
 function renderMgr(){
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
   const pb=$('pb');
   if(tab==='details')return detailsForm(pb);
   if(editing)return itemForm(pb);
-  const hasSample=S.items.some(i=>i.sample);
   pb.innerHTML=`<div class="row2"><span style="color:var(--mute)">${S.items.length} item${S.items.length===1?'':'s'} in the shop</span><button class="btn dark" id="addBtn">+ Add new item</button></div>
-   ${hasSample?'<div class="note">Items marked “sample” are examples to show the layout. Edit them into real stock or delete them.</div>':''}
-   ${S.items.map(it=>`<div class="item"><div class="th">${pic(it)}</div><div class="tx"><b>${esc(it.name)}</b><span>${esc(it.cat)} · ${rand(it.price)}${it.inStock?'':' · sold out'}${it.sample?' · sample':''}</span></div>
+   ${DB?'<div class="note">Changes save to the online database and show for every customer straight away.</div>':'<div class="note">No database connected: changes are saved on this device only.</div>'}
+   ${S.items.map(it=>`<div class="item"><div class="th">${pic(it)}</div><div class="tx"><b>${esc(it.name)}</b><span>${esc(it.cat)} · ${rand(it.price)}${it.inStock?'':' · sold out'}</span></div>
    <div class="acts"><button class="btn soft" data-e="${it.id}">Edit</button><button class="btn soft" data-d="${it.id}">Delete</button></div></div>`).join('')||'<p class="empty">No items yet. Tap “Add new item”.</p>'}
-   <div class="note" style="margin-top:24px">Backup: copy your shop data to keep it safe or move it to another device.<div class="foot" style="justify-content:flex-start"><button class="btn" id="copyData">Copy shop data</button><button class="btn" id="pasteData">Restore from copy</button><button class="btn" id="resetData">Reset to demo</button></div></div>`;
-  $('addBtn').onclick=()=>{editing={id:0,name:'',price:'',cat:'T-Shirts',sizes:[],desc:'',shape:'tee',color:'#141414',isNew:true,inStock:true};renderMgr()};
+   ${DB?`<div class="foot" style="justify-content:flex-start;margin-top:24px"><button class="btn" id="signOut">Sign out</button></div>`:
+   `<div class="note" style="margin-top:24px">Backup: copy your shop data to keep it safe or move it to another device.<div class="foot" style="justify-content:flex-start"><button class="btn" id="copyData">Copy shop data</button><button class="btn" id="pasteData">Restore from copy</button><button class="btn" id="resetData">Reset to demo</button></div></div>`}`;
+  $('addBtn').onclick=()=>{editing={id:0,name:'',price:'',cat:'T-Shirts',sizes:[],desc:'',shape:'tee',color:'#141414',imgs:[],isNew:true,inStock:true,sort:0};renderMgr()};
   pb.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{editing=JSON.parse(JSON.stringify(S.items.find(i=>i.id==b.dataset.e)));renderMgr()});
   pb.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{
     const it=S.items.find(i=>i.id==b.dataset.d);
-    modal(`<h3>Delete this item?</h3><p style="color:var(--mute)">“${esc(it.name)}” will be removed from the shop. This can't be undone.</p><div class="foot"><button class="btn" data-x="cancel">Keep it</button><button class="btn danger" id="yesDel">Delete</button></div>`);
-    $('yesDel').onclick=()=>{S.items=S.items.filter(i=>i!==it);save();closeModal();renderMgr();renderShop();toast('Item deleted')};
+    modal(`<h3>Delete this item?</h3><p style="color:var(--mute)">“${esc(it.name)}” will be removed from the shop. This can't be undone.</p><div class="err" id="delErr"></div><div class="foot"><button class="btn" data-x="cancel">Keep it</button><button class="btn danger" id="yesDel">Delete</button></div>`);
+    $('yesDel').onclick=async()=>{
+      if(DB){$('yesDel').disabled=true;const {error}=await DB.from('products').delete().eq('id',it.id);if(error){$('delErr').textContent='Could not delete: '+error.message;$('yesDel').disabled=false;return}removePhotos(it.imgs).catch(()=>{});}
+      else{S.items=S.items.filter(i=>i!==it);save()}
+      closeModal();await refresh();toast('Item deleted')};
   });
+  if(DB){$('signOut').onclick=async()=>{await DB.auth.signOut();unlocked=false;closeMgr();toast('Signed out')};return}
   $('copyData').onclick=async()=>{try{await navigator.clipboard.writeText(JSON.stringify(S));toast('Shop data copied')}catch(e){modal(`<h3>Copy this text</h3><textarea class="in" style="min-height:200px" readonly>${esc(JSON.stringify(S))}</textarea><div class="foot"><button class="btn" data-x="cancel">Done</button></div>`)}};
   $('pasteData').onclick=()=>{modal(`<h3>Restore shop data</h3><p style="color:var(--mute)">Paste data you copied earlier. It replaces everything currently in the shop.</p><textarea class="in" id="rest" style="min-height:160px"></textarea><div class="err" id="restErr"></div><div class="foot"><button class="btn" data-x="cancel">Cancel</button><button class="btn dark" id="doRest">Restore</button></div>`);
     $('doRest').onclick=()=>{try{const d=JSON.parse($('rest').value);if(!d.items||!d.details)throw 0;S=d;save();closeModal();renderMgr();renderShop();toast('Shop restored')}catch(e){$('restErr').textContent='That text is not valid shop data.'}}};
@@ -282,6 +340,7 @@ function renderMgr(){
 }
 function itemForm(pb){
   const it=editing,isNewItem=!it.id;
+  const origImgs=[...(it.imgs||[])];
   pb.innerHTML=`<div class="row2"><h3 style="margin:0;font-size:22px">${isNewItem?'Add a new item':'Edit item'}</h3><button class="btn" id="back">Back to list</button></div>
   <form id="itF">
    <label class="f" for="fn">Item name</label><input class="in" id="fn" value="${esc(it.name)}" placeholder="Embroidered Polo" required>
@@ -293,19 +352,30 @@ function itemForm(pb){
    <div class="photo"><div class="thumbs" id="prev"></div><div><input type="file" id="ff" accept="image/*" multiple><div style="color:var(--mute);font-size:13px;margin-top:6px">Add front, back or side photos. The first photo shows in the shop. Photos are resized automatically.</div></div></div>
    <div class="chips" style="margin-top:16px"><label class="chip"><input type="checkbox" id="fnew"${it.isNew?' checked':''}>Show “New in” badge</label><label class="chip"><input type="checkbox" id="fstock"${it.inStock?' checked':''}>In stock</label></div>
    <div class="err" id="itErr"></div>
-   <div class="foot"><button class="btn dark">${isNewItem?'Add item to shop':'Save changes'}</button></div>
+   <div class="foot"><button class="btn dark" id="saveIt">${isNewItem?'Add item to shop':'Save changes'}</button></div>
   </form>`;
   $('back').onclick=()=>{editing=null;renderMgr()};
   if(!it.imgs)it.imgs=it.img?[it.img]:[];delete it.img;
   const drawPrev=()=>{$('prev').innerHTML=it.imgs.length?it.imgs.map((u,i)=>`<div class="th"><img src="${u}" alt=""><button type="button" class="x" data-r="${i}" aria-label="Remove photo">×</button></div>`).join(''):`<div class="th">${art(it)}</div>`};drawPrev();
   $('prev').onclick=e=>{const b=e.target.closest('[data-r]');if(!b)return;it.imgs.splice(+b.dataset.r,1);drawPrev()};
   $('ff').onchange=e=>{[...e.target.files].forEach(f=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const M=900,k=Math.min(1,M/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);it.imgs.push(c.toDataURL('image/jpeg',.8));drawPrev()};im.onerror=()=>$('itErr').textContent='A file could not be read as a photo.';im.src=r.result};r.readAsDataURL(f)});e.target.value=''};
-  $('itF').onsubmit=e=>{e.preventDefault();
+  $('itF').onsubmit=async e=>{e.preventDefault();if(busy)return;
     const name=$('fn').value.trim(),price=parseFloat($('fp').value);
     if(!name||!(price>=0)){$('itErr').textContent='Please add a name and a price.';return}
-    Object.assign(it,{name,price,cat:$('fc').value,desc:$('fd').value.trim(),sizes:[...pb.querySelectorAll('.chips input[value]:checked')].map(x=>x.value),isNew:$('fnew').checked,inStock:$('fstock').checked,sample:false});
-    if(isNewItem){it.id=Date.now();S.items.unshift(it)}else S.items=S.items.map(x=>x.id===it.id?it:x);
-    save();editing=null;renderMgr();renderShop();toast(isNewItem?'Item added to shop':'Changes saved');
+    Object.assign(it,{name,price,cat:$('fc').value,desc:$('fd').value.trim(),sizes:[...pb.querySelectorAll('.chips input[value]:checked')].map(x=>x.value),isNew:$('fnew').checked,inStock:$('fstock').checked});
+    if(DB){
+      busy=true;$('saveIt').disabled=true;$('saveIt').textContent='Saving…';$('itErr').textContent='';
+      try{
+        it.imgs=await uploadPhotos(it.imgs);
+        if(isNewItem){it.sort=S.items.reduce((m,x)=>Math.min(m,x.sort||0),1)-1;const {error}=await DB.from('products').insert(toRow(it));if(error)throw error}
+        else{const {error}=await DB.from('products').update(toRow(it)).eq('id',it.id);if(error)throw error;removePhotos(origImgs.filter(u=>!it.imgs.includes(u))).catch(()=>{})}
+      }catch(err){fail($('itErr'),err);$('saveIt').disabled=false;$('saveIt').textContent=isNewItem?'Add item to shop':'Save changes';return}
+      busy=false;
+    }else{
+      if(isNewItem){it.id=Date.now();S.items.unshift(it)}else S.items=S.items.map(x=>x.id===it.id?it:x);
+      save();
+    }
+    editing=null;await refresh();toast(isNewItem?'Item added to shop':'Changes saved');
   };
 }
 function detailsForm(pb){
@@ -317,11 +387,22 @@ function detailsForm(pb){
    <label class="f" for="dk">Instagram</label><input class="in" id="dk" value="${esc(d.tiktok)}">
    <label class="f" for="do">Orders and delivery</label><input class="in" id="do" value="${esc(d.orders)}">
    <label class="f" for="dl">Location</label><input class="in" id="dl" value="${esc(d.location||'')}">
-   <label class="f" for="dpin">Manager PIN</label><input class="in" id="dpin" value="${esc(d.pin)}" inputmode="numeric" minlength="4" required>
-   <div class="foot"><button class="btn dark">Save details</button></div></form>`;
-  $('dF').onsubmit=e=>{e.preventDefault();Object.assign(d,{tagline:$('dt').value.trim(),about:$('da').value.trim(),whatsapp:$('dw').value.trim(),phone:$('dp').value.trim(),tiktok:$('dk').value.trim(),orders:$('do').value.trim(),location:$('dl').value.trim(),pin:$('dpin').value.trim()});save();renderShop();toast('Shop details saved')};
+   ${DB?'':`<label class="f" for="dpin">Manager PIN</label><input class="in" id="dpin" value="${esc(d.pin)}" inputmode="numeric" minlength="4" required>`}
+   <div class="err" id="dErr"></div>
+   <div class="foot"><button class="btn dark" id="saveD">Save details</button></div></form>`;
+  $('dF').onsubmit=async e=>{e.preventDefault();if(busy)return;
+    const v={tagline:$('dt').value.trim(),about:$('da').value.trim(),whatsapp:$('dw').value.trim(),phone:$('dp').value.trim(),tiktok:$('dk').value.trim(),orders:$('do').value.trim(),location:$('dl').value.trim()};
+    if(DB){busy=true;$('saveD').disabled=true;
+      const {error}=await DB.from('settings').upsert({id:1,tagline:v.tagline,about:v.about,whatsapp:v.whatsapp,phone:v.phone,instagram:v.tiktok,orders:v.orders,location:v.location});
+      busy=false;$('saveD').disabled=false;if(error)return fail($('dErr'),error);
+      Object.assign(d,v);
+    }else{Object.assign(d,v,{pin:$('dpin').value.trim()});save()}
+    renderShop();toast('Shop details saved')};
 }
-renderShop();
+if(DB){
+  $('grid').innerHTML='<div class="empty">Loading the collection…</div>';
+  loadDB().then(renderShop).catch(()=>{S=JSON.parse(JSON.stringify(DEFAULT));renderShop();toast('Could not reach the shop database. Showing saved items.')});
+}else renderShop();
 }
 </script>
 </body>
