@@ -41,6 +41,14 @@ language sql stable security definer set search_path = public as $$
   select exists (select 1 from public.admins where lower(email) = lower(auth.jwt() ->> 'email'));
 $$;
 
+-- Let the website (anon) and signed-in managers (authenticated) use these tables through the API
+grant usage on schema public to anon, authenticated;
+grant select on public.products, public.settings to anon, authenticated;
+grant insert, update, delete on public.products, public.settings to authenticated;
+grant select on public.admins to authenticated;
+grant usage, select on all sequences in schema public to authenticated;
+grant execute on function public.is_admin() to anon, authenticated;
+
 -- 4. Security: everyone can read, only admins can change
 alter table public.products enable row level security;
 alter table public.settings enable row level security;
